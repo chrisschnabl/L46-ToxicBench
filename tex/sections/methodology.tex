@@ -1,0 +1,37 @@
+\section{Methodology}
+
+This section details our approach to improving toxicity detection by leveraging pre-trained classifiers like DistilBERT, for computational efficiency and adaptability to different domains. We outline the metrics used to evaluate classification performance, including precision, recall, and AUROC, and describe our experimental pipeline built for diverse datasets and reproducibility.
+
+\subsection{Classifiers}
+BERT (Bidirectional Encoder Representations from Transformers) is a transformer-based model that efficiently captures bidirectional context by processing text from both left-to-right and right-to-left, that works well for various NLP tasks~\cite{devlin2018bert}. Building upon BERT, RoBERTa optimizes the pre-training process by employing larger datasets and dynamic masking~\cite{liu2019roberta}. DistilBERT simplifies the BERT architecture, retaining about 97\% of its language understanding capabilities while being more computationally efficient, which makes it particularly suitable for our use-case~\cite{sanh2019distilbert}.
+For our first experiment, we use the DistilBERT abse model as a baseline~\cite{sanh2019distilbert} and three pre-trained models: the DistilBERT-ToxicChat model~\cite{ToxicChat}, fine-tuned on the ToxicChat dataset for human-AI interactions, the DistilBERT-Toxicity-Classifier~\cite{huggingface_toxicity_classifier}, and the larger ToxDect-RoBERTa-Large~\cite{huggingface_toxdect_roberta}.\newline
+We selected DistilBERT for the second experiment as a base model. By fine-tuning this pre-trained model on toxicity detection, we adjust its weights based on task-specific datasets. These models are employed as classifiers by converting text into representations that are then mapped to categories like "toxic" or "non-toxic".\newline
+We chose not to use LLaMA for fine-tuning due to cost considerations --- although Parameter-efficient fine-tuning (PEFT) and LoRA could potentially reduce compute requirements, a quantized LLaMA model would still necessitate approximately 3 hours of compute for larger instances, at least requiring two A100 in high bandwidth memory-mode to fit weights into memory incurring higher expenses than the entire scope of this paper. Additionally, we did not include commercial OpenAI models in our study; while fine-tuning these models is feasible, inference on large datasets would be prohibitively expensive due to the high number of tokens involved.
+
+\subsection{Metrics}
+\label{sec:metrics}
+For each model we collect the following metrics, that can entirely be derived from the predictions and logits. First, we determine the confusion matrix ($TP$, $TN$, $FN$, $FP$) and then deduct the metrics as follow. Accuracy measures the percentage of text samples correctly labeled as toxic or non-toxic out of all predictions: $\frac{TP+TN}{
+TP+TN+FP+FN}$. Precision, $\frac{TP}{TP + FP}$, indicates the percentage of texts flagged as toxic that were actually toxic, i.e how well the model avoids falsely flagging safe content. Recall, $\frac{TP}{TP + FN}$, presents the percentage of truly toxic content successfully identified, in other words, the effectiveness of the model in protecting users from harmful content. The F1 Score, $2\cdot\frac{Precision*Recall}{Precision+Recall}$ is a balanced metric that combines precision and recall, to get the trade-off between catching toxic content and avoiding false alarms. AUROC is the area under the operating characteristics curve and gives the model's ability to distinguish between toxic and non-toxic content across different sensitivity thresholds, where 1.0 indicates perfect separation. AUPRC is the area under the precision/recall curve and assesses how well a model maintains precision and recall as the sensitivity threshold changes, particularly important given the rarity of toxic comments in datasets.
+
+\subsection{Pipeline}
+\label{sec:evaluation}
+The following pipeline describes our two main experiments.  
+All components used in our experiments, including models, datasets, and metrics, are accessible via Hugging Face~\cite{datasets_models_results}. Each pipeline step is designed to function independently, and uses artifacts that can be stored and retrieved from cloud services. This  alos for reproducibility and allows for flexibility during development and testing.
+\paragraph{1. Collect and prepare datasets}
+The first step is to collect and prepare datasets. This means mapping them all to one and the same format. Most of them come in Hugging Face, but some need extra cleaning for unnecessary columns (e.g., extra labels like output columns), unprocessable tokens, and applying a threshold to get a binary label. For very large datasets, we sometimes have to take a representative subset (see Table~\ref{tab:toxicity_datasets}). We also make sure that there is always a train and test split. After this, we tokenize each dataset multiple times for each respecitve base model. Note: we could not use ImplicitToxicity, as their dataset was broken.
+
+\paragraph{2. Model collection, adaptation, and fine-tuning}
+
+\begin{enumerate}
+    \item \textbf{Collect existing models.} We collect existing models and attach a classification head if they are not built for classification, but text output. Some models drop out here because they are either too large or computationally infeasible. We use the same train and test examples in both 2.2 and 2.3 so the experiments remain compatible while answering different questions.
+
+    \item \textbf{Evaluate existing work} This evaluates how some of the most popular existing models perform on benchmarks to assess how relevant this problem is. We also have to use the respective tokenizer for each model, which makes processing harder, as datasets have to be tokenized multiple times for each base model architecture. 
+
+    \item \textbf{Ablation Study} For the ablation study, we use DistilBERT to fine-tune the same base model on different datasets. This captures related work but in a more controlled way. While models in 2.2 are trained on the full corpus and achieve higher quality, compute constraints in 2.3 mean we can only use subsets. We ensure these subsets are large enough and that the toxicity rate is the same across the subset and the original dataset. We fine-tune models on different datasets to evaluate performance. We do not provide curves for accuracy and loss because we do not fine-tune for many epochs, focusing instead on variety across datasets. Models are trained for three epochs with a batch size of 32 examples on 5000 examples per dataset. Other hyperparameters use standard choices for model fine-tuning. Hyperparameter tuning is not performed as it would not change trends, only performance. For the loss function, we use binary cross-entropy, a learning rate of $2e^{-6}$, and weight decay of 0.01. Training runs for 3–4 hours on one NVIDIA L4 GPU, costing no more than $3$ USD depending on the provider.
+\end{enumerate}
+
+\paragraph{3. Evaluate models}
+After training, we evaluate the models. In addition to metrics~\ref{sec:metrics}, for reproducibility and debugging we save raw outputs, including predictions and logits. Running inference across all models, using more examples, takes around 7 hours on one L4 GPU, costing no more than $7$ USD.
+
+\paragraph{4. Aggregate results, visualzie, create plots}
+We aggregate results, including metrics, experiment logs, and model outputs, and push them to Hugging Face. We print plots using Seaborn and manually convert them into TikZ diagrams for this pdf.

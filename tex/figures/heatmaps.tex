@@ -1,0 +1,222 @@
+\begin{tikzpicture}
+
+% Heatmap 1: Accuracy
+\begin{axis}[
+    at={(0, 0)},  % Position of the first heatmap
+    anchor=south west,
+    colormap/spring,
+    width=5cm,
+    height=4.5cm,
+    enlargelimits=false,
+    axis on top,
+    title={(a) Accuracy},
+    title style={font=\scriptsize},
+    ylabel={Datasets},
+    xtick={0,1,2,3,4},
+    xticklabels={},
+    x tick label style={rotate=45,anchor=east},
+    ytick={0,1,2,3,4},
+    yticklabels={cc, rtp, jsaw, tc, mixed},
+    nodes near coords,
+    every node near coord/.append style={
+        font=\scriptsize,
+        inner sep=0pt,
+        anchor=center,
+    },
+    label style={font=\scriptsize},
+    tick label style={font=\scriptsize},
+    point meta min=0,
+    point meta max=1,
+]
+\addplot[
+    matrix plot,
+    mesh/cols=5,
+    point meta=explicit,
+] table[x=x, y=y, meta=meta] {data/hm_accuracy.txt};
+\end{axis}
+
+% Heatmap 2: Precision
+\begin{axis}[
+    at={(4.15cm, 0)},  % Position next to Accuracy heatmap
+    anchor=south west,
+    colormap/spring,
+    width=5cm,
+    height=4.5cm,
+    enlargelimits=false,
+    axis on top,
+    title={(b) Precision},
+    title style={font=\scriptsize},
+    xtick={0,1,2,3,4},
+    xticklabels={},
+    x tick label style={rotate=45,anchor=east},
+    ytick={0,1,2,3,4}, 
+    yticklabels={},
+    nodes near coords,
+    every node near coord/.append style={
+        font=\scriptsize,
+        inner sep=0pt,
+        anchor=center,
+    },
+    label style={font=\scriptsize},
+    tick label style={font=\scriptsize},
+    point meta min=0,
+    point meta max=1,
+]
+\addplot[
+    matrix plot,
+    mesh/cols=5,
+    point meta=explicit,
+] table[x=x, y=y, meta=meta] {data/hm_precision.txt};
+\end{axis}
+
+% Heatmap 3: Recall
+\begin{axis}[
+    at={(8.3cm, 0)},  % Position next to Precision heatmap
+    anchor=south west,
+    colormap/spring,
+    colorbar,
+    colorbar style={
+        width=0.25cm,
+        font=\scriptsize,
+    },
+    width=5cm,
+    height=4.5cm,
+    enlargelimits=false,
+    axis on top,
+    title={(c) Recall},
+    title style={font=\scriptsize},
+    xtick={0,1,2,3,4},
+    xticklabels={},
+    x tick label style={rotate=45,anchor=east},
+    ytick={0,1,2,3,4},
+    yticklabels={},
+    nodes near coords,
+    every node near coord/.append style={
+        font=\scriptsize,
+        inner sep=0pt,
+        anchor=center,
+    },
+    label style={font=\scriptsize},
+    tick label style={font=\scriptsize},
+    point meta min=0,
+    point meta max=1,
+]
+\addplot[
+    matrix plot,
+    mesh/cols=5,
+    point meta=explicit,
+] table[x=x, y=y, meta=meta] {data/hm_recall.txt};
+\end{axis}
+
+% Heatmap 4: F1
+\begin{axis}[
+    at={(0, -3.75cm)},  % Position below Accuracy heatmap
+    anchor=south west,
+    colormap/spring,
+    width=5cm,
+    height=4.5cm,
+    enlargelimits=false,
+    axis on top,
+    title={(d) F1},
+    title style={font=\scriptsize},
+    xlabel={Models},
+    ylabel={Datasets},
+    xtick={0,1,2,3,4},
+    xticklabels={cc, rtp, jsaw, tc, mixed},
+    x tick label style={rotate=45,anchor=east},
+    ytick={0,1,2,3,4},
+    yticklabels={cc, rtp, jsaw, tc, mixed},
+    nodes near coords,
+    every node near coord/.append style={
+        font=\scriptsize,
+        inner sep=0pt,
+        anchor=center,
+    },
+    label style={font=\scriptsize},
+    tick label style={font=\scriptsize},
+    point meta min=0,
+    point meta max=1,
+]
+\addplot[
+    matrix plot,
+    mesh/cols=5,
+    point meta=explicit,
+] table[x=x, y=y, meta=meta] {data/hm_f1.txt};
+\end{axis}
+
+% Heatmap 5: AUROC
+\begin{axis}[
+    at={(4.1cm, -3.75cm)},  % Position next to F1 heatmap
+    anchor=south west,
+    colormap/spring,
+    width=5cm,
+    height=4.5cm,
+    enlargelimits=false,
+    axis on top,
+    title={(e) AUROC},
+    title style={font=\scriptsize},
+    xlabel={Models},
+    xtick={0,1,2,3,4},
+    xticklabels={cc, rtp, jsaw, tc, mixed},
+    x tick label style={rotate=45,anchor=east},
+    ytick={0,1,2,3,4},
+    yticklabels={},
+    nodes near coords,
+    every node near coord/.append style={
+        font=\scriptsize,
+        inner sep=0pt,
+        anchor=center,
+    },
+    label style={font=\scriptsize},
+    tick label style={font=\scriptsize},
+    point meta min=0,
+    point meta max=1,
+]
+\addplot[
+    matrix plot,
+    mesh/cols=5,
+    point meta=explicit,
+] table[x=x, y=y, meta=meta] {data/hm_auroc.txt};
+\end{axis}
+
+% Heatmap 6: AUPRC
+\begin{axis}[
+    at={(8.2cm, -3.75cm)},  % Position next to AUROC heatmap
+    anchor=south west,
+    colormap/spring,
+    colorbar,
+    colorbar style={
+        width=0.25cm,
+        font=\scriptsize,
+    },
+    width=5cm,
+    height=4.5cm,
+    enlargelimits=false,
+    axis on top,
+    title={(f) AUPRC},
+    title style={font=\scriptsize},
+    xlabel={Models},
+    xtick={0,1,2,3,4},
+    xticklabels={cc, rtp, jsaw, tc, mixed},
+    x tick label style={rotate=45,anchor=east},
+    ytick={0,1,2,3,4},
+    yticklabels={},
+    nodes near coords,
+    every node near coord/.append style={
+        font=\scriptsize,
+        inner sep=0pt,
+        anchor=center,
+    },
+    label style={font=\scriptsize},
+    tick label style={font=\scriptsize},
+    point meta min=0,
+    point meta max=1,
+]
+\addplot[
+    matrix plot,
+    mesh/cols=5,
+    point meta=explicit,
+] table[x=x, y=y, meta=meta] {data/hm_auprc.txt};
+\end{axis}
+
+\end{tikzpicture}

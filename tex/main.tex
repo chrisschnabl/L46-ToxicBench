@@ -1,0 +1,93 @@
+\documentclass{article}
+
+% if you need to pass options to natbib, use, e.g.:
+%     \PassOptionsToPackage{numbers, compress}{natbib}
+% before loading neurips_2020
+
+% ready for submission
+% \usepackage{neurips_2020}
+
+% to compile a preprint version, e.g., for submission to arXiv, add add the
+% [preprint] option:
+%     \usepackage[preprint]{neurips_2020}
+
+% to compile a camera-ready version, add the [final] option, e.g.:
+     \usepackage[final]{neurips_2020}
+
+% to avoid loading the natbib package, add option nonatbib:
+    % \usepackage[nonatbib]{neurips_2020}
+
+\usepackage[utf8]{inputenc} % allow utf-8 input
+\usepackage[T1]{fontenc}    % use 8-bit T1 fonts
+\usepackage{hyperref}       % hyperlinks
+\usepackage{url}            % simple URL typesetting
+\usepackage{booktabs}       % professional-quality tables
+\usepackage{amsfonts}       % blackboard math symbols
+\usepackage{nicefrac}       % compact symbols for 1/2, etc.
+\usepackage{microtype}      % microtypography
+\usepackage{float} %
+\usepackage{tikz}
+\usepackage{pgfplots}
+\usepgfplotslibrary{colormaps} 
+\pgfplotsset{compat=1.17}
+\pgfplotsset{
+    colormap={inverted summer}{
+        indices of colormap={
+            100,75,...,0 of colormap/summer
+        }
+    }
+}
+\usetikzlibrary{shapes.geometric, arrows, positioning}
+
+\tikzstyle{startstop} = [rectangle, rounded corners, minimum width=3cm, minimum height=1cm, text centered, draw=black, fill=red!30]
+\tikzstyle{process} = [rectangle, minimum width=3cm, minimum height=1cm, text centered, draw=black, fill=blue!30]
+\tikzstyle{data} = [parallelogram, minimum width=3cm, minimum height=1cm, text centered, draw=black, fill=green!30]
+\tikzstyle{arrow} = [thick,->,>=stealth
+
+\PassOptionsToPackage{numbers,sort&compress}{natbib}
+\usepackage{natbib}
+
+\title{ToxicBench: Fine-Tuning Alone is Not Enough for Generalizable Toxicity Detection Across Datasets}
+
+% The \author macro works with any number of authors. There are two commands
+% used to separate the names and addresses of multiple authors: \And and \AND.
+%
+% Using \And between authors leaves it to LaTeX to determine where to break the
+% lines. Using \AND forces a line break at that point. So, if LaTeX puts 3 of 4
+% authors names on the first line, and the last on the second line, try using
+% \AND instead of \And before the third author name.
+
+\author{%
+  Christoph Schnabl \\
+      University of Cambridge \\
+  \texttt{cs2280@cam.ac.uk}
+}
+
+\begin{document}
+
+\maketitle
+
+
+\begin{abstract}
+% TODO make contributions a bit clearer.
+Detecting toxic language remains a significant challenge for online platforms, even with state-of-the-art (SOTA) large language models. Current approaches often suffer from overfitting to specific datasets, limited generalizability across contexts, and inconsistent toxicity definitions. We present ToxicBench, a comprehensive benchmark that incorporates four widely-used  toxicity classification models: DistilBERT with sysytem prompt, DistilBERT Toxicchat, ToxDect-roberta-large, Distilbert-toxicity-classifier and four datasets RealToxicityPrompts, ToxicChat, Jigsaw, and CivilComments for a total of over 2.1 million rows.\newline
+Our evaluation shows performance degradation when models are tested outside their training domain. For example, the ToxicChat DistilBERT model achieves 0.75 precision on its training dataset, but only 0.07 precision on CivilComments. Similarly, the CivilComments model's F1 score drops from 0.31 on its training data to 0.04 on ToxicChat. In an ablation study involving DistilBERT variants trained on individual and combined datasets, we show that mixed-domain fine-tuning significantly improves cross-dataset generalization, achieving consistent performance for accuracy, F1, and AUROC between 0.93 and 0.97 across all test sets.  
+
+\end{abstract}
+
+\input{sections/introduction}
+\input{sections/background}
+\input{sections/methodology}
+\input{sections/evaluation}
+
+\input{sections/limitations}
+\input{sections/future_work}
+%\section{Conclusion TODO}
+\input{sections/conclusion} % TODO
+
+\newpage
+\bibliographystyle{plainnat} % or another style like 'unsrt', 'abbrvnat', etc.
+\bibliography{references} 
+
+
+\end{document}

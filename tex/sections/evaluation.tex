@@ -1,0 +1,54 @@
+\section{Evaluation}
+This section presents the results of our two experiments and the ToxicBench classifier. The first experiment compares existing models against each other across the four datasets, as described in Section~\ref{sec:ex}. The second experiment includes the ablation study (Section~\ref{sec:ablation}), where we fine-tuned a version of DistilBERT base for each dataset to evaluate its domain-specific performance and generalization capabilities and also includes our third contribution, where we finetune the same model on a mix of the dataset. The datasets, models, and results are available here~\cite{datasets_models_results} and the notebook code to generate the results is accessible here on Github~\cite{datasets_models_results}. 
+
+\subsection{Existing Models}
+\label{sec:ex}
+
+This subsection evaluates the performance of existing models, as shown in Figure~\ref{fig:performance_heatmaps}. The models evaluated include DistilBERT base, ToxicChat DistilBERT, TensorTrek, and ToxBERT. Each column in the heatmaps represents one of these models, while each row corresponds to a dataset: CivilComments (\texttt{cc}), RealToxicityPrompts (\texttt{rtp}), Jigsaw (\texttt{jsaw}), and ToxicChat (\texttt{tc}). The heatmaps display normalized values for each metric -- accuracy, precision, recall, F1, AUROC, and AUPRC -- to study performance across models and datasets and understand dataset-specific overfitting and cross-domain generalization. We also collect Expected Calibration Error (ECE), Matthews Correlation Coefficient (MCC), and Minimum classification error (MCE), but do not display it here conciseness.
+\begin{figure}[ht]
+    \centering
+    \input{figures/heatmaps_first}
+    \caption{Comparison of existing models (base) across datasets (CivilComments, RealToxicityPrompts, Jigsaw, ToxicChat, Mixed) with values
+normalized between 0 and 1}
+    \label{fig:performance_heatmaps}
+\end{figure}
+
+\textbf{DistilBERT Base:}
+The DistilBERT base model, used later for fine-tuning, shows extreme classification behavior, if not fine-funed. For the \texttt{tc} (ToxicChat) dataset, it predicts almost all examples as non-toxic, resulting in high accuracy (\textbf{93\%}) but zero recall and precision, leading to very low F1 and AUPRC scores. Conversely, on the \texttt{rtp} (RealToxicityPrompts) and \texttt{jsaw} (Jigsaw) datasets, it tends to mark nearly all inputs as toxic, achieving high recall (\textbf{1.0}) but terrible precision (as low as \textbf{0.1}) and accuracy (\textbf{10-13\%}). For \texttt{cc} (CivilComments), the behavior is more balanced but still yields poor overall performance.
+
+\textbf{ToxicChat DistilBERT:}
+The ToxicChat fine-tuned DistilBERT model performs well on its source dataset (\texttt{tc}), achieving \textbf{96\%} accuracy and \textbf{0.75\%} precision and recall. However, it generalizes poorly to other datasets, with accuracy dropping significantly (\textbf{0.1-0.33}) and precision ranging from \textbf{0.07\% to 0.48\%}. Recall is similarly poor across datasets (\textbf{0.31\% to 0.51\%}). This suggest the model overfits to its training domain and fails to capture the nuances of toxicity in Social Media interactions, especially performing poorly on \texttt{cc}.
+
+\textbf{TensorTrek Model:}
+This model achieves the most balanced performance across datasets. It shows good accuracy (\textbf{0.86-0.97}) and reasonable precision (\textbf{0.39-0.75}) on most datasets, except for slightly lower precision on \texttt{cc}. Recall is moderate (\textbf{0.51-0.89}) and it likely captures true toxic cases better than other models. Discrimination seemst good, with overall high AUROC scores (\textbf{0.81-0.99}). However, F1 and AUPRC scores are dataset-dependent, with only strong scores for \texttt{rtp} and \texttt{jsaw}.
+
+\textbf{ToxBERT:}
+The ToxBERT model performs well on most metrics, showing high accuracy (\textbf{89-97\%}) and AUROC (\textbf{0.93-0.97}). Precision is consistently strong across datasets (\textbf{0.68-0.88}), and recall ranges from moderate to high (\textbf{0.14-0.86}), with particularly strong results for \texttt{jsaw} and \texttt{rtp}. However, it struggles slightly on \texttt{cc}, where recall and F1 are notably lower (\textbf{0.31} and \textbf{0.53}, respectively). AUPRC is robust for all datasets except \texttt{tc}, where performance drops (\textbf{0.68}).\newline
+
+
+\subsection{Ablation Study}
+\label{sec:ablation}
+The ablation study evaluates how dataset-specific fine-tuning and mixed-domain training influence model generalization across toxicity benchmarks. Figure~\ref{fig:heatmaps} shows a comparison of models. Rows represent datasets (CivilComments, RealToxicityPrompts, Jigsaw, ToxicChat, and Mixed), columns the dataset used for fine-tuning, and cells represent evaluation metrics. Below we present six main results of this study and back it up with the respective metrics. 
+
+\begin{figure}[ht]
+    \centering
+    \input{figures/heatmaps}
+    \caption{Comparison of model performance metrics across datasets (CivilComments, RealToxicityPrompts, Jigsaw, ToxicChat, Mixed) and models finetund on the respecive dataset with values normalized between 0 and 1.}
+    \label{fig:heatmaps}
+\end{figure}
+
+\textbf{Dataset-specific models excel in their own domain but fail elsewhere:} For instance, the \texttt{cc}-specific model achieves the highest precision on \texttt{cc} (\textbf{0.67}) but shows very low F1 scores (\textbf{0.12}) and AUPRC (\textbf{0.1}) on \texttt{tc}. Similarly, the \texttt{rtp}-specific model has high F1 (\textbf{0.84}) and AUPRC (\textbf{0.81}) on \texttt{rtp} but struggles on \texttt{tc} with AUPRC dropping to \textbf{0.34}.
+
+\textbf{Precision drops significantly for nuanced datasets}: The \texttt{tc} dataset, which represents nuanced and implicit toxicity, highlights a notable weakness in precision for most models, with values ranging from \textbf{0} (cc-specific model) to \textbf{0.37} (rtp-specific model).
+
+\textbf{Fine-tuning on individual datasets leads to strong dataset-specific performance but poor generalization:}  
+Models fine-tuned on individual datasets like \texttt{tc} (ToxicChat) and \texttt{rtp} (RealToxicityPrompts) perform exceptionally well on their respective datasets, achieving near-perfect accuracy (\textbf{0.96–0.97}) and AUROC (\textbf{0.96–0.99}). However, these models fail to generalize to other datasets. For instance, the \texttt{tc}-specific model achieves strong recall on \texttt{tc} (\textbf{0.82}) but struggles with recall on \texttt{cc} (\textbf{0.12}) and precision on \texttt{rtp} (\textbf{0.37}). Similarly, the \texttt{rtp}-specific model, while excelling on \texttt{rtp} (precision: \textbf{0.86}, recall: \textbf{0.83}), fails on \texttt{tc} with recall dropping to \textbf{0.12}. This is a critical problem for real-world toxicity detection across diverse domains.
+
+\textbf{Mixed-dataset fine-tuning achieves the best cross-dataset generalization:}  
+The mixed-dataset model performs well across all datasets, with accuracy (\textbf{0.93–0.97}), AUROC (\textbf{0.93–0.97}), and balanced F1 scores (\textbf{0.39–0.73}). It shows better performance on datasets like \texttt{cc}, where other models perform poorly. Precision and recall remain balanced across datasets, with values of \textbf{0.8} and \textbf{0.67}, respectively, which could indicate that the mixed model is better equipped to handle domain shifts. Mixed-domain fine-tuning could create more robust toxicity classifiers that generalize well to unseen domains, overcoming the overfitting seen with single-dataset models.
+
+\textbf{Precision and recall trade-offs are dataset-dependent:}  
+Dataset characteristics heavily influence the trade-offs between precision and recall. For example, the \texttt{ cc}-specific model has high precision (\textbf{0.67}) but low recall (\textbf{0.29}), avoiding false positives in a data set with subtle toxic content. Conversely, the \texttt{rtp}-specific model balances precision (\textbf{0.86}) and recall (\textbf{0.83}) on \texttt{rtp}, where toxicity is more explicit. The mixed-dataset model smooths these trade-offs with reasonable precision and recall (\textbf{0.8} and \textbf{0.67}) across datasets. For real-world context, both false positives (users feeling censored) and false negatives (toxicity spreading) can have significant consequences.
+
+\textbf{Performance on subtle toxicity detection remains a challenge:}  
+Despite the improvements with mixed-dataset fine-tuning, handling subtle or implicit toxicity remains difficult. The AUPRC scores for the \texttt{cc} dataset, which contains more nuanced toxic content, remain low (\textbf{0.37} for the mixed model) compared to datasets with explicit toxicity, such as \texttt{rtp} (\textbf{0.8}). This shows that while mixed-domain training can improve generalization, detecting nuanced toxicity across diverse datasets requires further architectural advancements or specialized training techniques. Future work should focus on better representations of implicit toxicity.
